@@ -68,8 +68,36 @@ function App() {
         }
     }, [readOnlyProposalContract, readOnlyProvider]);
 
+
+
+    const onProposalCreated = (proposalId, description, recipient, amount, votingDeadline, minVotesToPass) => {
+
+        setProposals((prevProposals) => [
+            ...prevProposals,
+            {
+                proposalId,
+                description: description,
+                amount: amount,
+                minRequiredVote: minVotesToPass,
+                votecount: 0,
+                deadline: votingDeadline,
+                executed: false,
+            }
+        ])
+       
+       
+    };
+
+
     useEffect(() => {
+        if(!readOnlyProposalContract) return;
+        readOnlyProposalContract.on("ProposalCreated", onProposalCreated);
         fetchProposals();
+
+        return () => {
+            readOnlyProposalContract.removeListener("ProposalCreated", onProposalCreated)
+         }
+ 
     }, [fetchProposals]);
 
     return (
